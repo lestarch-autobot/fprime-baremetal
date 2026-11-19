@@ -3,6 +3,7 @@
 // \brief Baremetal implementation for Os::FileSystem
 // ======================================================================
 #include "fprime-baremetal/Os/Baremetal/FileSystem.hpp"
+#include <Fw/Types/Assert.hpp>
 #include <cstdio>
 #include <cstring>
 #include <fprime-baremetal/Os/Baremetal/MicroFs/MicroFs.hpp>
@@ -36,9 +37,7 @@ BaremetalFileSystem::Status BaremetalFileSystem::_removeDirectory(const char* pa
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_getPathType(const char* path, PathType& pathType) {
-    if (path == nullptr) {
-        return INVALID_PATH;
-    }
+    FW_ASSERT(path != nullptr);
 
     // get file state
     FwIndexType index = 0;
@@ -67,9 +66,7 @@ BaremetalFileSystem::Status BaremetalFileSystem::_getPathType(const char* path, 
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_removeFile(const char* path) {
-    if (path == nullptr) {
-        return INVALID_PATH;
-    }
+    FW_ASSERT(path != nullptr);
 
     // get file state
     FwIndexType index = 0;
@@ -94,6 +91,8 @@ BaremetalFileSystem::Status BaremetalFileSystem::_removeFile(const char* path) {
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_rename(const char* originPath, const char* destPath) {
+    FW_ASSERT(originPath != nullptr);
+    FW_ASSERT(destPath != nullptr);
     Status copyStat = Os::FileSystem::copyFile(originPath, destPath);
     if (copyStat != OP_OK) {
         return copyStat;
@@ -103,16 +102,20 @@ BaremetalFileSystem::Status BaremetalFileSystem::_rename(const char* originPath,
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_getWorkingDirectory(char* path, FwSizeType bufferSize) {
+    FW_ASSERT(path != nullptr);
+    FW_ASSERT(bufferSize > 0);  // same contract as the other implementations
     return NOT_SUPPORTED;
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_changeWorkingDirectory(const char* path) {
+    FW_ASSERT(path != nullptr);
     return OP_OK;
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_getFreeSpace(const char* path,
                                                                FwSizeType& totalBytes,
                                                                FwSizeType& freeBytes) {
+    FW_ASSERT(path != nullptr);
     totalBytes = 0;
     freeBytes = 0;
 
