@@ -26,7 +26,14 @@ class BaremetalDirectory : public DirectoryInterface {
     BaremetalDirectory();
 
     //! \brief destructor
-    ~BaremetalDirectory() = default;
+    ~BaremetalDirectory() override = default;
+
+    //! \brief report the open state
+    //! \return true if a directory is open, false otherwise
+    bool isOpenImpl() const override;
+
+    // The read override below would otherwise hide the read(Fw::StringBase&) overload of DirectoryInterface
+    using DirectoryInterface::read;
 
     //! \brief return the underlying mutex handle (implementation specific)
     //! \return internal mutex handle representation

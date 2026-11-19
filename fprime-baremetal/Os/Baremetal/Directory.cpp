@@ -20,7 +20,11 @@ DirectoryHandle* BaremetalDirectory::getHandle() {
     return &this->m_handle;
 }
 
-BaremetalDirectory::Status BaremetalDirectory::open(const char* path, OpenMode /*mode*/) {
+bool BaremetalDirectory::isOpenImpl() const {
+    return this->m_handle.m_dir_index != BaremetalDirectoryHandle::INVALID_DIR_DESCRIPTOR;
+}
+
+BaremetalDirectory::Status BaremetalDirectory::open(const char* path, OpenMode mode) {
     // The directory can only be one of the
     // bin file names, and it is already "created" if
     // the bin exists. See if the directory matches
@@ -28,6 +32,11 @@ BaremetalDirectory::Status BaremetalDirectory::open(const char* path, OpenMode /
     // return NO_PERMISSION.
 
     FW_ASSERT(path != nullptr);
+    FW_ASSERT(mode >= 0 and mode < OpenMode::MAX_OPEN_MODE);
+    // Re-opening releases the previous directory; a failed open leaves the directory closed
+    if (this->isOpen()) {
+        this->close();
+    }
 
     const char* dirPathSpec = "/" MICROFS_BIN_STRING "%" MICROFS_INDEX_SCN_FORMAT;
 
@@ -52,14 +61,18 @@ BaremetalDirectory::Status BaremetalDirectory::open(const char* path, OpenMode /
 }
 
 BaremetalDirectory::Status BaremetalDirectory::rewind() {
+    if (not this->isOpen()) {
+        return Status::NOT_OPENED;
+    }
     this->m_handle.m_file_index = 0;
     return Status::OP_OK;
 }
 
 BaremetalDirectory::Status BaremetalDirectory::read(char* fileNameBuffer, FwSizeType bufSize) {
     FW_ASSERT(fileNameBuffer != nullptr);
-    if (this->m_handle.m_dir_index == BaremetalDirectoryHandle::INVALID_DIR_DESCRIPTOR) {
-        return BAD_DESCRIPTOR;
+    FW_ASSERT(bufSize > 0);
+    if (not this->isOpen()) {
+        return Status::NOT_OPENED;
     }
 
     MicroFs& microfs = MicroFs::getSingleton();
@@ -87,7 +100,8 @@ BaremetalDirectory::Status BaremetalDirectory::read(char* fileNameBuffer, FwSize
 
         // check to see if it has been written
         if (fState->created) {
-            (void)memcpy(fileNameBuffer, fileStr.toChar(), bufSize);
+            // Copy at most bufSize characters; the result is always null-terminated
+            (void)Fw::StringUtils::string_copy(fileNameBuffer, fileStr.toChar(), bufSize);
             status = OP_OK;
             // increment here too otherwise the break will cause the index to not increment
             this->m_handle.m_file_index++;
