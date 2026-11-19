@@ -13,7 +13,7 @@ CpuInterface::Status BaremetalCpu::_getCount(FwSizeType& cpu_count) {
     return Status::OP_OK;
 }
 
-CpuInterface::Status BaremetalCpu::_getTicks(Os::Cpu::Ticks& ticks, FwSizeType cpu_index) {
+CpuInterface::Status BaremetalCpu::_getTicks(CpuInterface::Ticks& ticks, FwSizeType cpu_index) {
     // Baremetal currently returns 100% in all cases
     ticks.total = 1;
     ticks.used = 1;

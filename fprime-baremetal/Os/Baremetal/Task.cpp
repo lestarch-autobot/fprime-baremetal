@@ -45,10 +45,10 @@ bool BaremetalTask::isCooperative() {
     return true;
 }
 
-Os::Task::Status BaremetalTask::_delay(const Fw::TimeInterval& interval) {
+Os::TaskInterface::Status BaremetalTask::_delay(const Fw::TimeInterval& interval) {
     // It is an error to attempt to delay a baremetal task because this would amount to [insert something bad here]
     FW_ASSERT(0);
-    return Os::Task::Status::UNKNOWN_ERROR;
+    return Os::TaskInterface::Status::UNKNOWN_ERROR;
 }
 
 }  // namespace Baremetal

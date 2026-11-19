@@ -7,7 +7,7 @@
 namespace Os {
 namespace Baremetal {
 
-MemoryInterface::Status BaremetalMemory::_getUsage(Os::Memory::Usage& memory_usage) {
+MemoryInterface::Status BaremetalMemory::_getUsage(MemoryInterface::Usage& memory_usage) {
     memory_usage.used = 1;
     memory_usage.total = 1;
     return Status::OP_OK;

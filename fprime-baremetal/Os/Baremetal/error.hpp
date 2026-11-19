@@ -17,31 +17,31 @@ namespace Baremetal {
 //! \param errno_input: errno representation of the error
 //! \return: Os::File::Status representation of the error
 //!
-Os::File::Status errno_to_file_status(int errno_input);
+Os::FileInterface::Status errno_to_file_status(int errno_input);
 
 //! Convert an errno representation of an error to the Os::FileSystem::Status representation.
 //! \param errno_input: errno representation of the error
 //! \return: Os::FileSystem::Status representation of the error
 //!
-Os::FileSystem::Status errno_to_filesystem_status(int errno_input);
+Os::FileSystemInterface::Status errno_to_filesystem_status(int errno_input);
 
 //! Convert an errno representation of an error to the Os::FileSystem::Status representation.
 //! \param errno_input: errno representation of the error
 //! \return: Os::Directory::Status representation of the error
 //!
-Os::Directory::Status errno_to_directory_status(int errno_input);
+Os::DirectoryInterface::Status errno_to_directory_status(int errno_input);
 
 //! Convert an errno representation of an error to the Os::RawTime::Status representation.
 //! \param errno_input: errno representation of the error
 //! \return: Os::RawTime::Status representation of the error
 //!
-Os::RawTime::Status errno_to_rawtime_status(int errno_input);
+Os::RawTimeInterface::Status errno_to_rawtime_status(int errno_input);
 
 //! Convert an baremetal task representation of an error to the Os::Task::Status representation.
 //! \param baremetal_status: errno representation of the error
 //! \return: Os::Task::Status representation of the error
 //!
-Os::Task::Status baremetal_status_to_task_status(int baremetal_status);
+Os::TaskInterface::Status baremetal_status_to_task_status(int baremetal_status);
 
 }  // namespace Baremetal
 }  // namespace Os
