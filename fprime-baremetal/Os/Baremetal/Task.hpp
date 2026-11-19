@@ -23,7 +23,12 @@ class BaremetalTask : public TaskInterface {
     BaremetalTask();
 
     //! Destructor
-    ~BaremetalTask() override = default;
+    ~BaremetalTask() override;
+
+    // The overrides below would otherwise hide the common overloads defined on TaskInterface
+    using TaskInterface::join;
+    using TaskInterface::start;
+    using TaskInterface::suspend;
 
     //! \brief perform required task start actions
     void onStart() override;

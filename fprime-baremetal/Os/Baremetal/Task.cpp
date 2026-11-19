@@ -11,14 +11,24 @@ BaremetalTask::BaremetalTask() {
     (void)TaskRunner::getSingleton();  // Force the task runner into existence
 }
 
+BaremetalTask::~BaremetalTask() {
+    this->deregister(this);
+}
+
 void BaremetalTask::onStart() {}
 
 Os::TaskInterface::Status BaremetalTask::join() {
-    return Os::TaskInterface::Status::OP_OK;
+    if (not this->prepareJoin(this)) {
+        return Os::TaskInterface::Status::INVALID_STATE;
+    }
+    const Status status = Os::TaskInterface::Status::OP_OK;
+    this->completeJoin(this, status);
+    return status;
 }
 
 void BaremetalTask::suspend(Os::TaskInterface::SuspensionType suspensionType) {
     this->m_handle.m_enabled = false;
+    this->completeSuspend(this, suspensionType);
 }
 
 void BaremetalTask::resume() {
@@ -30,15 +40,19 @@ Os::TaskHandle* BaremetalTask::getHandle() {
 }
 
 Os::TaskInterface::Status BaremetalTask::start(const Os::TaskInterface::Arguments& arguments) {
+    FW_ASSERT(arguments.m_routine != nullptr);
+    const Arguments wrapped_arguments = this->prepareStart(this, arguments);
     // Set handle member variables
     this->m_handle.m_enabled = true;
-    this->m_handle.m_routine = arguments.m_routine;
-    this->m_handle.m_argument = arguments.m_routine_argument;
+    this->m_handle.m_routine = wrapped_arguments.m_routine;
+    this->m_handle.m_argument = wrapped_arguments.m_routine_argument;
 
     // Running the task the first time allows setup activities for the task
     this->m_handle.m_routine(this->m_handle.m_argument);
 
-    return Os::TaskInterface::Status::OP_OK;
+    const Status status = Os::TaskInterface::Status::OP_OK;
+    this->completeStart(this, status, wrapped_arguments);
+    return status;
 }
 
 bool BaremetalTask::isCooperative() {
