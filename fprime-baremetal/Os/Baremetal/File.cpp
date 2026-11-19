@@ -62,8 +62,8 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
                                           BaremetalFile::Mode mode,
                                           BaremetalFile::OverwriteType overwrite) {
     FileInterface::assertValidPath(path);
-    // Not dispatched virtually: the checks and the descriptor belong to this class
-    return this->BaremetalFile::openImpl(path, mode, overwrite);
+    // Dispatched virtually so that a subclass overriding openImpl() sees every open
+    return this->openImpl(path, mode, overwrite);
 }
 
 bool BaremetalFile::isOpenImpl() const {
@@ -185,7 +185,9 @@ BaremetalFile::Status BaremetalFile::preallocate(FwSizeType offset, FwSizeType l
 }
 
 void BaremetalFile::close() {
-    if (this->m_handle.m_state_entry != BaremetalFileHandle::INVALID_STATE_ENTRY) {
+    // A file that is already closed holds no descriptor to release
+    if (this->m_handle.m_state_entry != BaremetalFileHandle::INVALID_STATE_ENTRY &&
+        this->m_handle.m_file_descriptor != BaremetalFileHandle::INVALID_FILE_DESCRIPTOR) {
         // only do cleanup of file state
         // if file system memory is still around
         // catches case where file objects are still

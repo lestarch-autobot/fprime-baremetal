@@ -5,7 +5,7 @@
 #ifndef OS_BAREMETAL_FILE_HPP
 #define OS_BAREMETAL_FILE_HPP
 
-#include <Os/File.hpp>
+#include <Os/FileInterface.hpp>
 
 namespace Os {
 namespace Baremetal {
