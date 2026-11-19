@@ -20,7 +20,7 @@ BaremetalFile::BaremetalFile(const BaremetalFile& other) : FileInterface(other) 
 
 BaremetalFile::~BaremetalFile() {
     // An open file is closed on destruction. Qualified call: overrides are not reachable from a destructor
-    if (this->m_mode != OPEN_NO_MODE) {
+    if (this->BaremetalFile::isOpenImpl()) {
         this->BaremetalFile::close();
     }
 }
@@ -62,6 +62,18 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
                                           BaremetalFile::Mode mode,
                                           BaremetalFile::OverwriteType overwrite) {
     FileInterface::assertValidPath(path);
+    // Not dispatched virtually: the checks and the descriptor belong to this class
+    return this->BaremetalFile::openImpl(path, mode, overwrite);
+}
+
+bool BaremetalFile::isOpenImpl() const {
+    return this->_isOpen();
+}
+
+BaremetalFile::Status BaremetalFile::openImpl(const char* path,
+                                              BaremetalFile::Mode mode,
+                                              BaremetalFile::OverwriteType overwrite) {
+    FW_ASSERT(path != nullptr);
     FW_ASSERT((Mode::OPEN_NO_MODE < mode) && (mode < Mode::MAX_OPEN_MODE));
     FW_ASSERT((0 <= this->m_mode) && (this->m_mode < Mode::MAX_OPEN_MODE));
     FW_ASSERT((0 <= overwrite) && (overwrite < OverwriteType::MAX_OVERWRITE_TYPE));
@@ -153,7 +165,7 @@ bool BaremetalFile::_isOpen() const {
 BaremetalFile::Status BaremetalFile::preallocate(FwSizeType offset, FwSizeType length) {
     FW_ASSERT((0 <= this->m_mode) && (this->m_mode < Mode::MAX_OPEN_MODE));
     // Check that the file is open for writing before attempting operation
-    if (OPEN_NO_MODE == this->m_mode) {
+    if (not this->isOpen()) {
         return Status::NOT_OPENED;
     } else if (OPEN_READ == this->m_mode) {
         return Status::INVALID_MODE;
@@ -196,7 +208,7 @@ void BaremetalFile::close() {
 BaremetalFile::Status BaremetalFile::size(FwSizeType& size_result) {
     FW_ASSERT((0 <= this->m_mode) && (this->m_mode < Mode::MAX_OPEN_MODE));
     // Check that the file is open before attempting operation
-    if (OPEN_NO_MODE == this->m_mode) {
+    if (not this->isOpen()) {
         return Status::NOT_OPENED;
     }
     MicroFs::MicroFsFileState* state =
@@ -210,7 +222,7 @@ BaremetalFile::Status BaremetalFile::size(FwSizeType& size_result) {
 BaremetalFile::Status BaremetalFile::position(FwSizeType& position_result) {
     FW_ASSERT((0 <= this->m_mode) && (this->m_mode < Mode::MAX_OPEN_MODE));
     // Check that the file is open before attempting operation
-    if (OPEN_NO_MODE == this->m_mode) {
+    if (not this->isOpen()) {
         return Status::NOT_OPENED;
     }
     MicroFs::MicroFsFileState* state =
@@ -227,7 +239,7 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
     FW_ASSERT((seekType == SeekType::RELATIVE) || (offset >= 0));
     FW_ASSERT((0 <= this->m_mode) && (this->m_mode < Mode::MAX_OPEN_MODE));
     // Check that the file is open before attempting operation
-    if (OPEN_NO_MODE == this->m_mode) {
+    if (not this->isOpen()) {
         return Status::NOT_OPENED;
     }
     // make sure it has been opened
@@ -274,7 +286,7 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
 BaremetalFile::Status BaremetalFile::flush() {
     FW_ASSERT((0 <= this->m_mode) && (this->m_mode < Mode::MAX_OPEN_MODE));
     // Check that the file is open for writing before attempting operation
-    if (OPEN_NO_MODE == this->m_mode) {
+    if (not this->isOpen()) {
         return Status::NOT_OPENED;
     } else if (OPEN_READ == this->m_mode) {
         return Status::INVALID_MODE;
@@ -292,7 +304,7 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSizeType& size, Baremeta
     FW_ASSERT(buffer != nullptr);
     FW_ASSERT((0 <= this->m_mode) && (this->m_mode < Mode::MAX_OPEN_MODE));
     // Check that the file is open for reading before attempting operation
-    if (OPEN_NO_MODE == this->m_mode) {
+    if (not this->isOpen()) {
         size = 0;
         return Status::NOT_OPENED;
     } else if (OPEN_READ != this->m_mode) {
@@ -343,7 +355,7 @@ BaremetalFile::Status BaremetalFile::write(const U8* buffer, FwSizeType& size, B
     FW_ASSERT(buffer != nullptr);
     FW_ASSERT((0 <= this->m_mode) && (this->m_mode < Mode::MAX_OPEN_MODE));
     // Check that the file is open for writing before attempting operation
-    if (OPEN_NO_MODE == this->m_mode) {
+    if (not this->isOpen()) {
         size = 0;
         return Status::NOT_OPENED;
     } else if (OPEN_READ == this->m_mode) {

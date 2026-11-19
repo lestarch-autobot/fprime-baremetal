@@ -73,6 +73,22 @@ class BaremetalFile : public FileInterface {
     //!
     Os::FileInterface::Status open(const char* path, Mode mode, OverwriteType overwrite) override;
 
+    //! \brief open a file whose path length the caller has already bounded
+    //!
+    //! Performs every check of `open` except the FileNameStringSize bound on the path.
+    //!
+    //! \param path: c-string of path to open, terminated within a bound checked by the caller
+    //! \param mode: file operation mode
+    //! \param overwrite: overwrite existing file on create
+    //! \return: status of the open
+    //!
+    Os::FileInterface::Status openImpl(const char* path, Mode mode, OverwriteType overwrite) override;
+
+    //! \brief report the open state, read from the handle
+    //! \return true if file is open, false otherwise
+    //!
+    bool isOpenImpl() const override;
+
     //! \brief close the file, if not opened then do nothing
     //!
     //! Closes the file, if open. Otherwise this function does nothing. Delegates to the chosen implementation's
