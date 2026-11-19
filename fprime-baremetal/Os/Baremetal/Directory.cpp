@@ -69,11 +69,13 @@ BaremetalDirectory::Status BaremetalDirectory::rewind() {
 }
 
 BaremetalDirectory::Status BaremetalDirectory::read(char* fileNameBuffer, FwSizeType bufSize) {
-    FW_ASSERT(fileNameBuffer != nullptr);
-    FW_ASSERT(bufSize > 0);
     if (not this->isOpen()) {
         return Status::NOT_OPENED;
     }
+    FW_ASSERT(fileNameBuffer != nullptr);
+    FW_ASSERT(bufSize > 0);
+    // The buffer is a valid string on every return, including NO_MORE_FILES
+    fileNameBuffer[0] = '\0';
 
     MicroFs& microfs = MicroFs::getSingleton();
 
