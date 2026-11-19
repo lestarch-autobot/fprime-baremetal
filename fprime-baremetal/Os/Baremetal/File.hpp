@@ -21,7 +21,7 @@ struct BaremetalFileHandle : public FileHandle {
     FwIndexType m_file_descriptor = INVALID_FILE_DESCRIPTOR;
     FwIndexType m_state_entry = INVALID_STATE_ENTRY;
     //! File mode
-    Os::FileInterface::Mode m_mode = Os::File::Mode::OPEN_NO_MODE;
+    Os::FileInterface::Mode m_mode = Os::FileInterface::Mode::OPEN_NO_MODE;
 };
 
 //! \brief baremetal implementation of Os::File
@@ -38,7 +38,12 @@ class BaremetalFile : public FileInterface {
 
     //! \brief destructor
     //!
-    ~BaremetalFile() = default;
+    ~BaremetalFile() override;
+
+    // The overrides below would otherwise hide the common overloads defined on FileInterface
+    using FileInterface::open;
+    using FileInterface::read;
+    using FileInterface::write;
 
     //!\brief default copy constructor
     BaremetalFile(const BaremetalFile& other);
